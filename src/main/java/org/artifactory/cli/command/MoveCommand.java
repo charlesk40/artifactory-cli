@@ -56,22 +56,42 @@ public class MoveCommand extends UrlBasedCommand implements Command {
                 String subFolderName = childrenNode.get("uri").getTextValue();
                 boolean isFolder = childrenNode.get("folder").getBooleanValue();
                 CliLog.info("folder name " + subFolderName + " folder " + isFolder);
-                // now, move one by one by calling move item Rest API.
-                // http://www.jfrog.com/confluence/display/RTF/Artifactory+REST+API#ArtifactoryRESTAPI-MoveItem
-                StringBuilder moveUrlBuilder = new StringBuilder(baseUrl);
-                moveUrlBuilder.append("move/").append(moveFrom).append(subFolderName).append("?to=/").append(moveTo)
-                                .append("&dry=").append((isDryRunSet ? 1 : 0));
-                CliLog.info(progress + "/" + rootNode.get("children").size() + " Calling move REST API "
-                                + moveUrlBuilder.toString());
-//                post(moveUrlBuilder.toString(), null, null, 200,
-//                                "application/vnd.org.jfrog.artifactory.storage.CopyOrMoveResult+json", true);
-//                StringBuilder verifyUrlBuilder = new StringBuilder(baseUrl);
-//                verifyUrlBuilder.append("storage/").append(moveTo).append("/").append(subFolderName);
-//                CliLog.info("Verifing the move: " + verifyUrlBuilder.toString());
-//                get(verifyUrlBuilder.toString(), 200, null, false);
+                //Check folder if a folder has any files.
+                StringBuilder checkFilesBuilder = new StringBuilder(baseUrl);
+                checkFilesBuilder.append("storage/").append(moveFrom).append(subFolderName);
+                byte[] files =
+                                get(checkFilesBuilder.toString(), 200,
+                                                "application/vnd.org.jfrog.artifactory.storage.FolderInfo+json", false);
+                JsonNode filesNode = objectMapper.readTree(files);
+                long filesSize = filesNode.get("children").size();
+                CliLog.info("files: " + filesNode.get("children").size());
+                
+                if (filesSize > 0){
+                    // now, move one by one by calling move item Rest API.
+                    // http://www.jfrog.com/confluence/display/RTF/Artifactory+REST+API#ArtifactoryRESTAPI-MoveItem
+                    StringBuilder moveUrlBuilder = new StringBuilder(baseUrl);
+                    moveUrlBuilder.append("move/").append(moveFrom).append(subFolderName).append("?to=/").append(moveTo)
+                                    .append("&dry=").append((isDryRunSet ? 1 : 0));
+                    CliLog.info(progress + "/" + rootNode.get("children").size() + " Calling move REST API "
+                                    + moveUrlBuilder.toString());
+                    post(moveUrlBuilder.toString(), null, null, 200,
+                                    "application/vnd.org.jfrog.artifactory.storage.CopyOrMoveResult+json", true);
+                    StringBuilder verifyUrlBuilder = new StringBuilder(baseUrl);
+                    verifyUrlBuilder.append("storage/").append(moveTo).append("/").append(subFolderName);
+                    CliLog.info("Verifing the move: " + verifyUrlBuilder.toString());
+                    get(verifyUrlBuilder.toString(), 200, null, false);
+                    TimeUnit.SECONDS.sleep(2);
+                }else{
+                    //for now skip as delete doesn't work
+                    CliLog.info("Skipping empty folder ");
+//                    StringBuilder deleteBuilder = new StringBuilder(baseUrl);
+//                    deleteBuilder.append(moveFrom).append(subFolderName);
+//                    String deleteUrl = deleteBuilder.toString().replace("api/", "");
+//                    CliLog.info("Removing empty folder " + deleteUrl);
+//                    RestClient.delete(deleteUrl, CliOption.username.getValue(), CliOption.password.getValue());
+                }
                 progress++;
-                TimeUnit.SECONDS.sleep(5);
-                break;
+                //break;
             }
         }
         return 0;
