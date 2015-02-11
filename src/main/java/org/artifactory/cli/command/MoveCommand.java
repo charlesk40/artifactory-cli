@@ -1,10 +1,12 @@
 package org.artifactory.cli.command;
 
+import org.apache.commons.httpclient.HttpStatus;
 import org.artifactory.cli.common.Command;
 import org.artifactory.cli.common.UrlBasedCommand;
 import org.artifactory.cli.main.CliLog;
 import org.artifactory.cli.main.CliOption;
 import org.artifactory.cli.main.CommandDefinition;
+import org.artifactory.cli.rest.RestClient;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
@@ -80,18 +82,15 @@ public class MoveCommand extends UrlBasedCommand implements Command {
                     verifyUrlBuilder.append("storage/").append(moveTo).append("/").append(subFolderName);
                     CliLog.info("Verifing the move: " + verifyUrlBuilder.toString());
                     get(verifyUrlBuilder.toString(), 200, null, false);
-                    TimeUnit.SECONDS.sleep(2);
                 }else{
-                    //for now skip as delete doesn't work
-                    CliLog.info("Skipping empty folder ");
-//                    StringBuilder deleteBuilder = new StringBuilder(baseUrl);
-//                    deleteBuilder.append(moveFrom).append(subFolderName);
-//                    String deleteUrl = deleteBuilder.toString().replace("api/", "");
-//                    CliLog.info("Removing empty folder " + deleteUrl);
-//                    RestClient.delete(deleteUrl, CliOption.username.getValue(), CliOption.password.getValue());
+                    StringBuilder deleteBuilder = new StringBuilder(baseUrl);
+                    deleteBuilder.append(moveFrom).append(subFolderName);
+                    String deleteUrl = deleteBuilder.toString().replace("api/", "");
+                    CliLog.info("Removing empty folder " + deleteUrl);
+                    RestClient.delete(deleteUrl, HttpStatus.SC_NO_CONTENT, null, false, -1, getCredentials());
                 }
+                TimeUnit.SECONDS.sleep(2);
                 progress++;
-                //break;
             }
         }
         return 0;
