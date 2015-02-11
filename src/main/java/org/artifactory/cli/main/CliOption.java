@@ -68,7 +68,11 @@ public enum CliOption implements Option {
     m2(
             "Create .m2 compatible metadata (sha1, md5 and maven-metadata.xml files) when exporting"),
     incremental("When exporting, this flag will determine if the export should be incremental or not"),
-    excludeContent("When exporting, this flag will do a pure configuration export (valid only on full system export)");
+    excludeContent("When exporting, this flag will do a pure configuration export (valid only on full system export)"), 
+    dryrun("You can test the command using dry run ", "dryrun"), 
+    srcFile("The source file for this command.", " src file"),
+    moveFrom("from path", "from path"),
+    moveTo("to path", "to path");
 
     private final Option option;
 

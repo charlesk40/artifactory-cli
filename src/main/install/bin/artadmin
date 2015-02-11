@@ -15,7 +15,7 @@ else
 fi
 
 CLI_DIR=`dirname $0`
-LIB_DIR=$CLI_DIR/../clilib
+LIB_DIR=$CLI_DIR/../../../../target/clilib
 CLASSPATH=.
 
 for i in `ls $LIB_DIR/*.jar`

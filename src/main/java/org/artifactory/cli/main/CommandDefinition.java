@@ -24,6 +24,7 @@ import org.artifactory.cli.command.ExportCommand;
 import org.artifactory.cli.command.HelpCommand;
 import org.artifactory.cli.command.ImportCommand;
 import org.artifactory.cli.command.InfoCommand;
+import org.artifactory.cli.command.MoveCommand;
 import org.artifactory.cli.command.SecurityCommand;
 import org.artifactory.cli.common.BaseParam;
 import org.artifactory.cli.common.Command;
@@ -61,8 +62,10 @@ public enum CommandDefinition {
             "Display or update the security definitions using a security configuration file."),
     configuration(
             ConfigurationCommand.class,
-            "Print or update the artifactory configuration using a configuration file.");
-
+            "Print or update the artifactory configuration using a configuration file."),
+    move(
+            MoveCommand.class,
+            "Move artifacts to another repository.");
     /**
      * The class of the command
      */
